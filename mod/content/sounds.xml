@@ -1,0 +1,8 @@
+<sounds root="sfx/">
+  <sound name="LoveGivingTrinkets">
+    <sample weight="1" path="lovegivingtrinkets.wav" />
+  </sound>
+  <sound name="Trinkets">
+    <sample weight="1" path="trinkets.wav" />
+  </sound>
+</sounds>
