@@ -1,14 +1,16 @@
 import {
   ButtonAction,
   CollectibleType,
+  EntityType,
   ModCallback,
+  PickupVariant,
   TrinketType,
 } from "isaac-typescript-definitions";
 import { sfxManager } from "isaacscript-common";
 
 const MOD_NAME = "trinkets";
 
-const TrinketSounds = {
+const SoundEffectCustom = {
   FRIENDS_AND_FAMILY: Isaac.GetSoundIdByName("LoveGivingTrinkets"),
   TRINKETS: Isaac.GetSoundIdByName("Trinkets"),
 } as const;
@@ -21,12 +23,26 @@ function main() {
   const mod = RegisterMod(MOD_NAME, 1);
 
   // Register a callback function that corresponds to when a new run is started.
+  mod.AddCallback(ModCallback.POST_USE_ITEM, momsBox, CollectibleType.MOMS_BOX);
+  mod.AddCallback(ModCallback.PRE_ENTITY_SPAWN, newTrinket);
   mod.AddCallback(ModCallback.POST_RENDER, dropTrinket);
-  mod.AddCallback(
-    ModCallback.POST_USE_ITEM,
-    playLoveGiving,
-    CollectibleType.MOMS_BOX,
-  );
+}
+
+function newTrinket(
+  entityType: EntityType,
+  variant: int,
+  subType: int,
+  _position: Vector,
+  _velocity: Vector,
+  _spawner: Entity | undefined,
+  initSeed: Seed,
+): [EntityType, int, int, int] | undefined {
+  if (PickupVariant.TRINKET === variant && EntityType.PICKUP === entityType) {
+    if ((subType as TrinketType) === TrinketType.NULL) {
+      sfxManager.Play(SoundEffectCustom.TRINKETS, 0.1);
+    }
+  }
+  return [entityType, variant, subType, initSeed];
 }
 
 const DROP_FRAMES = 120; // 2 seconds
@@ -47,9 +63,7 @@ function dropTrinket() {
           }
         }
         if (hasFamiliars) {
-          sfxManager.Play(TrinketSounds.FRIENDS_AND_FAMILY);
-        } else {
-          sfxManager.Play(TrinketSounds.TRINKETS);
+          sfxManager.Play(SoundEffectCustom.FRIENDS_AND_FAMILY);
         }
       }
     }
@@ -58,7 +72,8 @@ function dropTrinket() {
   }
 }
 
-function playLoveGiving() {
-  sfxManager.Play(TrinketSounds.FRIENDS_AND_FAMILY);
+function momsBox() {
+  sfxManager.Stop(SoundEffectCustom.TRINKETS);
+  sfxManager.Play(SoundEffectCustom.FRIENDS_AND_FAMILY);
   return true;
 }
