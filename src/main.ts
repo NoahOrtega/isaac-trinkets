@@ -4,9 +4,14 @@ import {
   ModCallback,
   TrinketType,
 } from "isaac-typescript-definitions";
-import { log } from "isaacscript-common";
+import { sfxManager } from "isaacscript-common";
 
 const MOD_NAME = "trinkets";
+
+const TrinketSounds = {
+  FRIENDS_AND_FAMILY: Isaac.GetSoundIdByName("LoveGivingTrinkets"),
+  TRINKETS: Isaac.GetSoundIdByName("Trinkets"),
+} as const;
 
 main();
 
@@ -16,19 +21,12 @@ function main() {
   const mod = RegisterMod(MOD_NAME, 1);
 
   // Register a callback function that corresponds to when a new run is started.
-  mod.AddCallback(ModCallback.POST_GAME_STARTED, postGameStarted);
   mod.AddCallback(ModCallback.POST_RENDER, dropTrinket);
   mod.AddCallback(
     ModCallback.POST_USE_ITEM,
     playLoveGiving,
     CollectibleType.MOMS_BOX,
   );
-  // Print an message to the "log.txt" file.
-  log(`${MOD_NAME} initialized.`);
-}
-
-function postGameStarted() {
-  print("Callback triggered: POST_GAME_STARTED");
 }
 
 const DROP_FRAMES = 120; // 2 seconds
@@ -49,11 +47,9 @@ function dropTrinket() {
           }
         }
         if (hasFamiliars) {
-          const sound = Isaac.GetSoundIdByName("LoveGivingTrinkets");
-          SFXManager().Play(sound);
+          sfxManager.Play(TrinketSounds.FRIENDS_AND_FAMILY);
         } else {
-          const sound = Isaac.GetSoundIdByName("Trinkets");
-          SFXManager().Play(sound);
+          sfxManager.Play(TrinketSounds.TRINKETS);
         }
       }
     }
@@ -63,7 +59,6 @@ function dropTrinket() {
 }
 
 function playLoveGiving() {
-  const sound = Isaac.GetSoundIdByName("LoveGivingTrinkets");
-  SFXManager().Play(sound);
+  sfxManager.Play(TrinketSounds.FRIENDS_AND_FAMILY);
   return true;
 }
