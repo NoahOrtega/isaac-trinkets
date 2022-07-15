@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <metadata>
-  <name>trinkets</name>
+  <name>Trinkets for friends and family</name>
   <directory>trinkets</directory>
-  <description>trinkets is a currently a work in progress.</description>
-  <version>1.0</version>
+  <description>Allows Isaac from the hit game Binding of Isaac to give trinkets to his friends and family, an activity which he loves.</description>
+  <version>1.1</version>
   <visibility />
 </metadata>
