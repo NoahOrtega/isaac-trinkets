@@ -4,11 +4,16 @@ import {
   EntityType,
   ModCallback,
   PickupVariant,
+  TrinketSlot,
   TrinketType,
 } from "isaac-typescript-definitions";
-import { sfxManager } from "isaacscript-common";
+import {
+  enableExtraConsoleCommands,
+  sfxManager,
+  upgradeMod,
+} from "isaacscript-common";
 
-const MOD_NAME = "trinkets";
+const MOD_NAME = "trinkets for friends and family";
 
 const SoundEffectCustom = {
   FRIENDS_AND_FAMILY: Isaac.GetSoundIdByName("LoveGivingTrinkets"),
@@ -18,14 +23,15 @@ const SoundEffectCustom = {
 main();
 
 function main() {
-  // Instantiate a new mod object, which grants the ability to add callback functions that
-  // correspond to in-game events.
-  const mod = RegisterMod(MOD_NAME, 1);
+  const modVanilla = RegisterMod(MOD_NAME, 1);
+  const mod = upgradeMod(modVanilla);
 
   // Register a callback function that corresponds to when a new run is started.
-  mod.AddCallback(ModCallback.POST_USE_ITEM, momsBox, CollectibleType.MOMS_BOX);
   mod.AddCallback(ModCallback.PRE_ENTITY_SPAWN, newTrinket);
   mod.AddCallback(ModCallback.POST_RENDER, dropTrinket);
+  mod.AddCallback(ModCallback.POST_USE_ITEM, momsBox, CollectibleType.MOMS_BOX);
+
+  enableExtraConsoleCommands(mod);
 }
 
 function newTrinket(
@@ -38,37 +44,42 @@ function newTrinket(
   initSeed: Seed,
 ): [EntityType, int, int, int] | undefined {
   if (PickupVariant.TRINKET === variant && EntityType.PICKUP === entityType) {
+    // Only NULL when it spawns during the current room.
     if ((subType as TrinketType) === TrinketType.NULL) {
-      sfxManager.Play(SoundEffectCustom.TRINKETS, 0.1);
+      sfxManager.Play(SoundEffectCustom.TRINKETS, 0.4);
     }
   }
   return [entityType, variant, subType, initSeed];
 }
 
 const DROP_FRAMES = 120; // 2 seconds
-let dropTimer = 0;
+const dropTimers: number[] = [0, 0, 0, 0];
 function dropTrinket() {
-  const player = Isaac.GetPlayer(0);
-  if (Input.IsActionPressed(ButtonAction.DROP, player.ControllerIndex)) {
-    dropTimer += 1;
-    if (dropTimer === DROP_FRAMES) {
-      const trinket = player.GetTrinket(0);
-      if (trinket !== TrinketType.NULL) {
-        let hasFamiliars = false;
-        for (const e of Isaac.GetRoomEntities()) {
-          const f = e.ToFamiliar();
-          if (f !== undefined) {
-            hasFamiliars = true;
-            break;
+  for (let pIndex = 0; pIndex < Game().GetNumPlayers(); pIndex++) {
+    const player = Isaac.GetPlayer(pIndex);
+    if (Input.IsActionPressed(ButtonAction.DROP, player.ControllerIndex)) {
+      dropTimers[pIndex] += 1;
+      // setPlayerDisplay((play: EntityPlayer): string => { const pI = getPlayerIndexVanilla(play);
+      // if (pI !== undefined) { return `${dropTimers[pI]}`; } return "error"; });
+      if (dropTimers[pIndex] === DROP_FRAMES) {
+        const trinket = player.GetTrinket(TrinketSlot.SLOT_1);
+        if (trinket !== TrinketType.NULL) {
+          let hasFamiliars = false;
+          for (const e of Isaac.GetRoomEntities()) {
+            const f = e.ToFamiliar();
+            if (f !== undefined) {
+              hasFamiliars = true;
+              break;
+            }
+          }
+          if (hasFamiliars || Game().GetNumPlayers() > 1) {
+            sfxManager.Play(SoundEffectCustom.FRIENDS_AND_FAMILY);
           }
         }
-        if (hasFamiliars) {
-          sfxManager.Play(SoundEffectCustom.FRIENDS_AND_FAMILY);
-        }
       }
+    } else {
+      dropTimers[pIndex] = 0;
     }
-  } else {
-    dropTimer = 0;
   }
 }
 
