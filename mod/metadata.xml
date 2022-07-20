@@ -2,7 +2,20 @@
 <metadata>
   <name>Trinkets for friends and family</name>
   <directory>trinkets</directory>
-  <description>Allows Isaac from the hit game Binding of Isaac to give trinkets to his friends and family, an activity which he loves.</description>
+  <id>2834767018</id>
+  <description>
+    Allows Isaac from the hit game Binding of Isaac to give trinkets to his friends and family, an activity which he loves.
+
+This mod adds 3 sound triggers:
+1) If a room reward is a trinket you'll exclaim "TRINKETS!"
+2) Every time you drop a trinket while you have a friend or family nearby you'll express how much you love giving trinkets to your friends and family
+3) When you use mom's box she'll tell you how much she loves giving trinkets to her friends and family (you)
+
+You're welcome.
+  </description>
   <version>1.1</version>
-  <visibility />
+  <visibility>Public</visibility>
+  <tag id="Lua" />
+  <tag id="Trinkets" />
+  <tag id="Sound Effects" />
 </metadata>
